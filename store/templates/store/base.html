@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ShopEase{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #e11d48; --dark: #0f172a; --accent: #f59e0b; }
+        body { font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: var(--dark) !important; padding: 0.75rem 0; }
+        .navbar-brand { font-size: 1.4rem; font-weight: 800; color: white !important; }
+        .navbar-brand span { color: var(--primary); }
+        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; }
+        .nav-link:hover { color: white !important; }
+        .cart-badge {
+            position: absolute; top: -8px; right: -8px;
+            background: var(--primary); color: white; font-size: .65rem;
+            width: 18px; height: 18px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-weight: 700;
+        }
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: #be123c; border-color: #be123c; }
+        .btn-outline-primary { color: var(--primary); border-color: var(--primary); }
+        .btn-outline-primary:hover { background: var(--primary); border-color: var(--primary); }
+        .product-card { border: none; border-radius: 12px; overflow: hidden; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .product-img { height: 220px; object-fit: cover; width: 100%; background: #f1f5f9; }
+        .product-img-placeholder { height: 220px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); display:flex; align-items:center; justify-content:center; font-size:3rem; color:#94a3b8; }
+        .badge-discount { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; padding: .3rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 700; }
+        .wishlist-btn { position: absolute; top: 10px; right: 10px; }
+        .price { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+        .price-original { text-decoration: line-through; color: #94a3b8; font-size: .9rem; }
+        .stars { color: var(--accent); font-size: .85rem; }
+        .footer { background: var(--dark); color: rgba(255,255,255,0.7); padding: 3rem 0 1rem; }
+        .footer h6 { color: white; font-weight: 700; }
+        .footer a { color: rgba(255,255,255,0.6); text-decoration: none; display: block; margin-bottom: .4rem; }
+        .footer a:hover { color: white; }
+        .search-bar { max-width: 380px; }
+        .top-bar { background: var(--primary); color: white; font-size: .82rem; padding: .35rem 0; }
+        .category-pill { background: #f1f5f9; border-radius: 50px; padding: .4rem 1rem; display: inline-block; margin: .25rem; font-size: .85rem; color: #475569; cursor: pointer; text-decoration: none; transition: all .2s; }
+        .category-pill:hover { background: var(--primary); color: white; }
+        .alert { border-radius: 10px; border: none; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="top-bar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-truck me-1"></i>Free delivery on orders above ₹499</span>
+        <span class="d-none d-md-block"><i class="fas fa-phone me-1"></i>1800-123-4567 &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i>Mon-Sat 9AM-6PM</span>
+    </div>
+</div>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/">Shop<span>Ease</span></a>
+        <form class="d-flex search-bar mx-auto" action="{% url 'product_list' %}" method="get">
+            <input class="form-control" type="search" name="q" placeholder="Search products..." value="{{ request.GET.q }}">
+            <button class="btn btn-primary ms-1" type="submit"><i class="fas fa-search"></i></button>
+        </form>
+        <div class="d-flex align-items-center gap-3 ms-3">
+            {% if user.is_authenticated %}
+            <a href="{% url 'wishlist' %}" class="nav-link"><i class="fas fa-heart"></i></a>
+            <a href="{% url 'cart' %}" class="nav-link position-relative">
+                <i class="fas fa-shopping-cart"></i>
+                {% if cart_count > 0 %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+            </a>
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle"></i> {{ user.first_name|default:user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'orders' %}"><i class="fas fa-box me-2"></i>My Orders</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+{% endif %}
+</div>
+
+{% block content %}{% endblock %}
+
+<footer class="footer mt-5">
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <h4 style="color:white;font-weight:800;">Shop<span style="color:var(--primary);">Ease</span></h4>
+                <p>Your one-stop destination for everything you need. Quality products, best prices, fast delivery.</p>
+            </div>
+            <div class="col-lg-2">
+                <h6>Shop</h6>
+                <a href="{% url 'product_list' %}">All Products</a>
+                <a href="{% url 'product_list' %}?sort=newest">New Arrivals</a>
+            </div>
+            <div class="col-lg-2">
+                <h6>Account</h6>
+                {% if user.is_authenticated %}
+                <a href="{% url 'orders' %}">My Orders</a>
+                <a href="{% url 'wishlist' %}">Wishlist</a>
+                {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+                {% endif %}
+            </div>
+            <div class="col-lg-4">
+                <h6>Secure Payments</h6>
+                <div class="d-flex gap-2 flex-wrap mt-2">
+                    <span class="badge bg-secondary px-3 py-2"><i class="fas fa-credit-card me-1"></i>Cards</span>
+                    <span class="badge bg-secondary px-3 py-2">UPI</span>
+                    <span class="badge bg-secondary px-3 py-2">COD</span>
+                    <span class="badge bg-secondary px-3 py-2">Net Banking</span>
+                </div>
+            </div>
+        </div>
+        <hr style="border-color:rgba(255,255,255,0.1);">
+        <p class="text-center mb-0" style="font-size:.85rem;">© 2024 ShopEase. All rights reserved.</p>
+    </div>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

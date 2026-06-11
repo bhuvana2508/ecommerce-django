@@ -1,0 +1,34 @@
+{% extends 'store/base.html' %}
+{% block title %}Login - ShopEase{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm" style="border-radius:16px;">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold text-center mb-4"><i class="fas fa-user-circle me-2 text-primary"></i>Welcome Back</h4>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username</label>
+                            <input type="text" name="username" class="form-control" placeholder="Your username" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Your password" required>
+                        </div>
+                        {% if form.errors %}<div class="alert alert-danger">Invalid username or password.</div>{% endif %}
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </form>
+                    <p class="text-center mt-3 mb-0">New to ShopEase? <a href="{% url 'register' %}">Create Account</a></p>
+                    <hr class="my-3">
+                    <div class="text-center text-muted" style="font-size:.82rem;">
+                        <strong>Demo:</strong> admin / admin123 &nbsp;|&nbsp; user1 / pass123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

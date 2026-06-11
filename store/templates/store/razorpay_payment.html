@@ -1,0 +1,198 @@
+{% extends 'store/base.html' %}
+{% block title %}Pay with Razorpay - ShopEase{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+
+      <!-- Razorpay Modal Style Box -->
+      <div class="card border-0 shadow-lg" style="border-radius:16px; overflow:hidden;">
+
+        <!-- Razorpay Header -->
+        <div style="background: #2d81f7; padding: 20px 24px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="https://razorpay.com/favicon.ico" width="28" height="28" style="border-radius:50%; background:white; padding:2px;">
+            <div>
+              <div style="color:white; font-weight:700; font-size:16px;">ShopEase</div>
+              <div style="color:rgba(255,255,255,0.85); font-size:13px;">Secure Payment by Razorpay</div>
+            </div>
+          </div>
+          <div style="color:white; font-size:22px; font-weight:700;">₹{{ amount }}</div>
+        </div>
+
+        <div class="card-body p-4">
+
+          <!-- Payment Tabs -->
+          <ul class="nav nav-pills mb-4 gap-2" id="payTabs">
+            <li class="nav-item">
+              <button class="nav-link active px-3 py-2" onclick="showTab('card')" id="tab-card" style="font-size:13px;">
+                <i class="fas fa-credit-card me-1"></i> Card
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link px-3 py-2" onclick="showTab('upi')" id="tab-upi" style="font-size:13px;">
+                <i class="fas fa-mobile-alt me-1"></i> UPI
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link px-3 py-2" onclick="showTab('netbanking')" id="tab-nb" style="font-size:13px;">
+                <i class="fas fa-university me-1"></i> Net Banking
+              </button>
+            </li>
+          </ul>
+
+          <!-- CARD TAB -->
+          <div id="tab-content-card">
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="font-size:13px;">Card Number</label>
+              <input type="text" id="cardNumber" class="form-control" placeholder="4111 1111 1111 1111"
+                maxlength="19" oninput="formatCard(this)" value="4111 1111 1111 1111">
+              <div style="font-size:11px; color:#888; margin-top:4px;">Test card: 4111 1111 1111 1111</div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold" style="font-size:13px;">Expiry</label>
+                <input type="text" id="expiry" class="form-control" placeholder="MM/YY" maxlength="5" value="12/29">
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold" style="font-size:13px;">CVV</label>
+                <input type="password" id="cvv" class="form-control" placeholder="•••" maxlength="3" value="123">
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold" style="font-size:13px;">Name on Card</label>
+              <input type="text" id="cardName" class="form-control" placeholder="BHUVANA B" value="BHUVANA B">
+            </div>
+            <button class="btn btn-primary w-100 py-2 fw-bold" onclick="processPayment()" style="border-radius:8px; font-size:15px;">
+              <i class="fas fa-lock me-2"></i>Pay ₹{{ amount }} Securely
+            </button>
+          </div>
+
+          <!-- UPI TAB -->
+          <div id="tab-content-upi" style="display:none;">
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="font-size:13px;">UPI ID</label>
+              <input type="text" class="form-control" placeholder="yourname@upi" value="bhuvana@okaxis">
+            </div>
+            <div class="text-center my-3" style="color:#888; font-size:13px;">— or scan QR code —</div>
+            <div class="text-center mb-4">
+              <div style="background:#f5f5f5; border-radius:12px; padding:20px; display:inline-block;">
+                <div style="width:120px; height:120px; background: repeating-linear-gradient(45deg, #333 0px, #333 2px, white 2px, white 8px); border-radius:8px;"></div>
+              </div>
+              <div style="font-size:11px; color:#888; margin-top:6px;">Scan with any UPI app</div>
+            </div>
+            <button class="btn btn-primary w-100 py-2 fw-bold" onclick="processPayment()" style="border-radius:8px; font-size:15px;">
+              <i class="fas fa-check me-2"></i>Verify & Pay ₹{{ amount }}
+            </button>
+          </div>
+
+          <!-- NET BANKING TAB -->
+          <div id="tab-content-nb" style="display:none;">
+            <div class="mb-4">
+              <label class="form-label fw-semibold" style="font-size:13px;">Select Bank</label>
+              <div class="row g-2 mb-3">
+                {% for bank in banks %}
+                <div class="col-6">
+                  <div class="border rounded p-2 text-center bank-option" onclick="selectBank(this, '{{ bank }}')"
+                    style="cursor:pointer; font-size:13px; transition:all 0.2s;">
+                    <i class="fas fa-university me-1 text-primary"></i>{{ bank }}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <button class="btn btn-primary w-100 py-2 fw-bold" onclick="processPayment()" style="border-radius:8px; font-size:15px;">
+              <i class="fas fa-lock me-2"></i>Pay ₹{{ amount }} via Net Banking
+            </button>
+          </div>
+
+          <!-- OTP Modal -->
+          <div id="otpSection" style="display:none; margin-top:20px;">
+            <div class="alert alert-info p-3" style="border-radius:12px; font-size:13px;">
+              <i class="fas fa-sms me-2"></i>OTP sent to your registered mobile number
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="font-size:13px;">Enter OTP</label>
+              <input type="text" id="otpInput" class="form-control text-center fw-bold" placeholder="• • • • • •"
+                maxlength="6" style="letter-spacing:8px; font-size:20px;">
+              <div style="font-size:11px; color:#888; margin-top:4px;">Test OTP: 123456</div>
+            </div>
+            <button class="btn btn-success w-100 py-2 fw-bold" onclick="verifyOTP()" style="border-radius:8px;">
+              <i class="fas fa-check me-2"></i>Verify OTP & Complete Payment
+            </button>
+          </div>
+
+          <!-- Processing Spinner -->
+          <div id="processingSection" style="display:none; text-align:center; padding:30px 0;">
+            <div class="spinner-border text-primary mb-3" style="width:48px; height:48px;"></div>
+            <div style="font-size:15px; color:#555;">Processing your payment...</div>
+            <div style="font-size:12px; color:#888; margin-top:6px;">Please do not close this window</div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="background:#f9f9f9; padding:12px 24px; text-align:center; border-top:1px solid #eee;">
+          <span style="font-size:12px; color:#888;">
+            <i class="fas fa-lock me-1 text-success"></i>
+            256-bit SSL Secured &nbsp;|&nbsp; Powered by
+            <span style="color:#2d81f7; font-weight:700;">Razorpay</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Order info -->
+      <div class="text-center mt-3" style="font-size:13px; color:#888;">
+        Order #{{ order_number }} &nbsp;·&nbsp; {{ request.user.get_full_name|default:request.user.username }}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form to confirm payment -->
+<form id="confirmForm" method="post" action="{% url 'confirm_payment' order_id %}">
+  {% csrf_token %}
+  <input type="hidden" name="payment_id" value="pay_test_{{ order_id }}DEMO">
+</form>
+
+<script>
+function showTab(tab) {
+  ['card','upi','nb'].forEach(t => {
+    document.getElementById('tab-content-' + (t === 'nb' ? 'nb' : t)).style.display = 'none';
+    document.getElementById('tab-' + t).classList.remove('active');
+  });
+  document.getElementById('tab-content-' + tab).style.display = 'block';
+  document.getElementById('tab-' + (tab === 'netbanking' ? 'nb' : tab)).classList.add('active');
+  document.getElementById('otpSection').style.display = 'none';
+}
+
+function formatCard(input) {
+  let val = input.value.replace(/\D/g,'').substring(0,16);
+  input.value = val.replace(/(.{4})/g,'$1 ').trim();
+}
+
+function selectBank(el, bank) {
+  document.querySelectorAll('.bank-option').forEach(b => b.style.background = '');
+  el.style.background = '#e8f0fe';
+  el.style.borderColor = '#2d81f7';
+}
+
+function processPayment() {
+  document.querySelectorAll('[onclick="processPayment()"]').forEach(b => b.style.display='none');
+  document.getElementById('processingSection').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('processingSection').style.display = 'none';
+    document.getElementById('otpSection').style.display = 'block';
+  }, 2000);
+}
+
+function verifyOTP() {
+  const otp = document.getElementById('otpInput').value;
+  if(otp.length < 4) { alert('Please enter OTP'); return; }
+  document.getElementById('otpSection').style.display = 'none';
+  document.getElementById('processingSection').style.display = 'block';
+  setTimeout(() => { document.getElementById('confirmForm').submit(); }, 2500);
+}
+</script>
+{% endblock %}
