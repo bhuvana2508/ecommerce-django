@@ -14,8 +14,7 @@
             {% if product.image %}
             <img src="{{ product.image.url }}" class="img-fluid rounded-3 shadow" alt="{{ product.name }}">
             {% else %}
-            <div class="rounded-3 shadow" style="height:400px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:5rem;color:#94a3b8;">🛍️</div>
-            {% endif %}
+<img src="https://placehold.co/400x400/667eea/white?text={{ product.name|urlencode }}" class="img-fluid rounded-3 shadow" alt="{{ product.name }}">            {% endif %}
         </div>
         <div class="col-lg-7">
             <p class="text-muted mb-1">{{ product.category.name }}</p>
