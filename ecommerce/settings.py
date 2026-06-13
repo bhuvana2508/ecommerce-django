@@ -11,7 +11,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',          # ← must be BEFORE staticfiles
     'django.contrib.staticfiles',
+    'cloudinary',
     'store',
 ]
 
@@ -56,4 +58,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+# Cloudinary Settings
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dxf8refpe',
+    'API_KEY': '187477927818611',
+    'API_SECRET': 'Ey4fWVDryUePMdc84YZfujILPDE',  # paste your secret
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
