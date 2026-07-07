@@ -1,29 +1,27 @@
 from pathlib import Path
 import os
-import dj_database_url
 import cloudinary
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-dev-only')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['ecommerce-django-5ank.onrender.com', 'localhost', '127.0.0.1']
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://ecommerce-django-5ank.onrender.com']
 
 cloudinary.config(
-    cloud_name=os.environ.get('dxf8refpe'),
-    api_key=os.environ.get('983218454564645'),
-    api_secret=os.environ.get('NCc6loSkdEnsROZx0IAL5NXaN8Y'),
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', 'dxf8refpe'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY', '983399927747188'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET', 'wtt01W8SLbugHWQ-xkedg7hVYH0'),
     secure=True
 )
 
-
-
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('dxf8refpe'),
-    'API_KEY': os.environ.get('983218454564645'),
-    'API_SECRET': os.environ.get('NCc6loSkdEnsROZx0IAL5NXaN8Y'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dxf8refpe'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '983399927747188'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'wtt01W8SLbugHWQ-xkedg7hVYH0'),
 }
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -64,10 +62,10 @@ TEMPLATES = [{
 }]
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 STATIC_URL = '/static/'
